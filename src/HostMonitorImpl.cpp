@@ -31,12 +31,16 @@ HostMonitorImpl::HostMonitorImpl(Endpoint                    endpoint,
     , avail_(false)
 {
     // Test given protocol on construction.
-    if (endpoint_.protocol != Protocol::ICMP)
+    switch(endpoint_.getProtocol())
     {
+    case Protocol::ICMP:
+    case Protocol::TCP:
+        this->thread_ = std::thread(&HostMonitorImpl::monitorTarget, this);
+        break;
+
+    default:
         throw std::runtime_error("HostMonitor: Supplied unknown protocol");
     }
-
-    this->thread_ = std::thread(&HostMonitorImpl::monitorTarget, this);
 }
 
 HostMonitorImpl::~HostMonitorImpl()

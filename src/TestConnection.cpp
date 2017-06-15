@@ -32,15 +32,33 @@ namespace
         // Call command
         return (std::system(pingCmd.c_str()) == 0) ? true : false;
     }
+
+    // transport layer connection test is based on nc.
+    auto testConnectionTcp(std::string const& addr, uint16_t port) -> bool
+    {
+        // Create command
+        std::string ncCmd;
+
+        ncCmd += "nc -z ";                 // Establish connection, close afterwards
+        ncCmd += addr;                     // Specify address
+        ncCmd += " ";
+        ncCmd += std::to_string(port);     // Specify port
+
+        // Call command
+        return (std::system(ncCmd.c_str()) == 0) ? true : false;
+    }
 } // anon namespace
 
 auto testConnection(Endpoint const& endpoint) -> bool
 {
     // Demux by specified protocol
-    switch (endpoint.protocol)
+    switch (endpoint.getProtocol())
     {
     case Protocol::ICMP:
-        return testConnectionIcmp(endpoint.targetAddr);
+        return testConnectionIcmp(endpoint.getAddr());
+
+    case Protocol::TCP:
+        return testConnectionTcp(endpoint.getAddr(), endpoint.getPort());
 
     // NOTE: Add additional protocol support here ....
     }

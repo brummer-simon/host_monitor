@@ -30,21 +30,41 @@ class HostMonitorImpl;
  */
 typedef enum
 {
-    ICMP = 0   // Use ICMP messages (ping) to reach host.
+    ICMP = 0,   // Use ICMP messages (ping) to reach host.
+    TCP         // Use TCP to reach host.
 } Protocol;
 
 /**
  * @brief Endpoint structure used to hold connection parameters
  */
-struct Endpoint
+class Endpoint
 {
+public:
     /**
      * @brief Default constructor. Use generator functions instead.
      */
-    Endpoint(Protocol           protocol,
-             std::string const& targetAddr,
-             std::uint16_t      targetPort);
+    Endpoint(Protocol protocol, std::string const& addr, std::uint16_t port);
 
+    /**
+     * @brief Get Target: <addr>:<port>
+     */
+    auto getTarget() const -> std::string;
+
+    /**
+     * @brief Get target address.
+     */
+    auto getAddr() const -> std::string;
+
+    /**
+     * @brief Get target port.
+     */
+    auto getPort() const -> std::uint16_t;
+
+    /**
+     * @brief Get Protocol of Endpoint
+     */
+    auto getProtocol() const -> Protocol;
+private:
     Protocol const      protocol;   // Protocol to use for connection tests
     std::string  const  targetAddr; // Target Address: IP or FQDN
     std::uint16_t const targetPort; // Target Port: Portno of the Target.
@@ -52,9 +72,18 @@ struct Endpoint
 
 /**
  * @brief Function to generate an ICMP Endpoint.
- * @param[in] target     The target that should be monitored. Either FQDN or IP-Address.
+ * @param[in] targetAddr   The target that should be monitored. Either FQDN or IP-Address.
+ * @returns   Configured Endpoint
  */
 auto makeIcmpEndpoint(std::string const& targetAddr) -> Endpoint;
+
+/**
+ * @brief Function to generate an TCP Endpoint.
+ * @param[in] targetAddr   The target that should be monitored. Either FQDN or IP-Address.
+ * @param[in] targetPort   Port number to connect to.
+ * @returns   Configured Endpoint
+ */
+auto makeTcpEndpoint(std::string const& targetAddr, uint16_t targetPort) -> Endpoint;
 
 /**
  * @brief Checks if a specified host is reachable over the specified protocol.

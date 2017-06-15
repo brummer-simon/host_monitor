@@ -12,6 +12,7 @@
  * @date   12.6.2017
  */
 
+#include <cstdint>
 #include "HostMonitor.hpp"
 #include "include/HostMonitorImpl.hpp"
 
@@ -19,17 +20,53 @@ namespace host_monitor {
 
 // Endpoint related implementation
 Endpoint::Endpoint(Protocol           protocol,
-                   std::string const& targetAddr,
-                   std::uint16_t      targetPort)
+                   std::string const& addr,
+                   std::uint16_t      port)
     : protocol(protocol)
-    , targetAddr(targetAddr)
-    , targetPort(targetPort)
+    , targetAddr(addr)
+    , targetPort(port)
 {
+}
+
+auto Endpoint::getTarget() const -> std::string
+{
+    std::string str;
+    switch(protocol)
+    {
+    case Protocol::ICMP:
+        str = this->getAddr();
+        break;
+
+    case Protocol::TCP:
+        str = this->getAddr() + ":" + std::to_string(this->getPort());
+        break;
+    }
+    return str;
+}
+
+auto Endpoint::getAddr() const -> std::string
+{
+    return this->targetAddr;
+}
+
+auto Endpoint::getPort() const -> std::uint16_t
+{
+    return this->targetPort;
+}
+
+auto Endpoint::getProtocol() const -> Protocol
+{
+    return this->protocol;
 }
 
 auto makeIcmpEndpoint(std::string const& targetAddr) -> Endpoint
 {
     return Endpoint(Protocol::ICMP, targetAddr, 0);
+}
+
+auto makeTcpEndpoint(std::string const& targetAddr, std::uint16_t targetPort) -> Endpoint
+{
+    return Endpoint(Protocol::TCP, targetAddr, targetPort);
 }
 
 // Host Monitor related implementation
