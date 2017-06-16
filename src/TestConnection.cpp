@@ -34,15 +34,15 @@ namespace
     }
 
     // transport layer connection test is based on nc.
-    auto testConnectionTcp(std::string const& addr, uint16_t port) -> bool
+    auto testConnectionTcp(std::string const& addr, std::string const& port) -> bool
     {
         // Create command
         std::string ncCmd;
 
-        ncCmd += "nc -z ";                 // Establish connection, close afterwards
-        ncCmd += addr;                     // Specify address
+        ncCmd += "nc -z "; // Establish connection, close afterwards
+        ncCmd += addr;     // Specify address
         ncCmd += " ";
-        ncCmd += std::to_string(port);     // Specify port
+        ncCmd += port;     // Specify port
 
         // Call command
         return (std::system(ncCmd.c_str()) == 0) ? true : false;

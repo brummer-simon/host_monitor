@@ -18,10 +18,42 @@
 
 namespace host_monitor {
 
+// Protocol related implementation
+auto protocolToString(Protocol p) -> std::string
+{
+    switch(p)
+    {
+    case Protocol::ICMP:
+        return "icmp";
+
+    case Protocol::TCP:
+        return "tcp";
+
+    default:
+        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) +
+                                 ": given Protocol is found");
+    }
+}
+
+auto stringToProtocol(std::string s) -> Protocol
+{
+    if (s == "icmp")
+    {
+        return Protocol::ICMP;
+    }
+
+    if (s == "tcp")
+    {
+        return Protocol::TCP;
+    }
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) +
+                             ": " + s + " is not in Protocols");
+}
+
 // Endpoint related implementation
 Endpoint::Endpoint(Protocol           protocol,
                    std::string const& addr,
-                   std::uint16_t      port)
+                   std::string const& port)
     : protocol(protocol)
     , targetAddr(addr)
     , targetPort(port)
@@ -38,7 +70,7 @@ auto Endpoint::getTarget() const -> std::string
         break;
 
     case Protocol::TCP:
-        str = this->getAddr() + ":" + std::to_string(this->getPort());
+        str = this->getAddr() + ":" + this->getPort();
         break;
     }
     return str;
@@ -49,7 +81,7 @@ auto Endpoint::getAddr() const -> std::string
     return this->targetAddr;
 }
 
-auto Endpoint::getPort() const -> std::uint16_t
+auto Endpoint::getPort() const -> std::string
 {
     return this->targetPort;
 }
@@ -61,11 +93,32 @@ auto Endpoint::getProtocol() const -> Protocol
 
 auto makeIcmpEndpoint(std::string const& targetAddr) -> Endpoint
 {
-    return Endpoint(Protocol::ICMP, targetAddr, 0);
+    return Endpoint(Protocol::ICMP, targetAddr, "");
 }
 
-auto makeTcpEndpoint(std::string const& targetAddr, std::uint16_t targetPort) -> Endpoint
+auto makeTcpEndpoint(std::string const& targetAddr, std::string const& targetPort) -> Endpoint
 {
+    // Try to convert the given port number to an int
+    int val = 0;
+    try {
+        val = std::stoi(targetPort);
+    }
+    catch (...)
+    {
+        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) +
+                                 ": " + targetPort + " is not a valid number");
+    }
+
+    // Check if given Port number is within the port number range
+    int min = 0x0001;
+    int max = 0xFFFF;
+    if (val < min || max < val)
+    {
+        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) +
+                                 ": " + targetPort + " is not in [1, 65535]");
+    }
+
+    // Create endpoint
     return Endpoint(Protocol::TCP, targetAddr, targetPort);
 }
 

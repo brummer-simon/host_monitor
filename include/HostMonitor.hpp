@@ -35,6 +35,22 @@ typedef enum
 } Protocol;
 
 /**
+ * @brief Convert Protocol enum to its string representation.
+ * @note Might throw std::runtime_error.
+ * @param[in] p   The protocol value that should be converted.
+ * @returns @p as string.
+ */
+auto protocolToString(Protocol p) -> std::string;
+
+/**
+ * @brief Convert String to Protocol enum.
+ * @note Might throw std::runtime_error.
+ * @param[in] s   the string that should be parsed.
+ * @returns @p as enum protocol.
+ */
+auto stringToProtocol(std::string s) -> Protocol;
+
+/**
  * @brief Endpoint structure used to hold connection parameters
  */
 class Endpoint
@@ -43,7 +59,7 @@ public:
     /**
      * @brief Default constructor. Use generator functions instead.
      */
-    Endpoint(Protocol protocol, std::string const& addr, std::uint16_t port);
+    Endpoint(Protocol protocol, std::string const& addr, std::string const& port);
 
     /**
      * @brief Get Target: <addr>:<port>
@@ -58,16 +74,17 @@ public:
     /**
      * @brief Get target port.
      */
-    auto getPort() const -> std::uint16_t;
+    auto getPort() const -> std::string;
 
     /**
      * @brief Get Protocol of Endpoint
      */
     auto getProtocol() const -> Protocol;
+
 private:
-    Protocol const      protocol;   // Protocol to use for connection tests
-    std::string  const  targetAddr; // Target Address: IP or FQDN
-    std::uint16_t const targetPort; // Target Port: Portno of the Target.
+    Protocol const    protocol;   // Protocol to use for connection tests
+    std::string const targetAddr; // Target Address: IP or FQDN
+    std::string const targetPort; // Target Port: Portno of the Target.
 };
 
 /**
@@ -79,11 +96,12 @@ auto makeIcmpEndpoint(std::string const& targetAddr) -> Endpoint;
 
 /**
  * @brief Function to generate an TCP Endpoint.
+ * @throws std::runtime_error in case @p targetPort is invalid.
  * @param[in] targetAddr   The target that should be monitored. Either FQDN or IP-Address.
  * @param[in] targetPort   Port number to connect to.
  * @returns   Configured Endpoint
  */
-auto makeTcpEndpoint(std::string const& targetAddr, uint16_t targetPort) -> Endpoint;
+auto makeTcpEndpoint(std::string const& targetAddr, std::string const& targetPort) -> Endpoint;
 
 /**
  * @brief Checks if a specified host is reachable over the specified protocol.
