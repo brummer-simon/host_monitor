@@ -13,52 +13,53 @@
  */
 
 #include <cstdlib>
-#include "include/TestConnection.hpp"
+#include "TestConnection.hpp"
 
-namespace host_monitor {
-
+namespace host_monitor
+{
 namespace
 {
-    // network layer connection test is based on ping.
-    auto testConnectionIcmp(std::string const& target) -> bool
-    {
-        // Create command
-        std::string pingCmd;
+// network layer connection test is based on ping.
+auto test_connection_icmp(std::string const& fqhn) -> bool
+{
+    // Create command
+    std::string ping_cmd;
 
-        pingCmd += "ping -c 1 ";        // Send single ICMP packet
-        pingCmd += target;              // Specify target
-        pingCmd += " > /dev/null 2>&1"; // Discard output from command
+    ping_cmd += "ping -c 1 ";        // Send single ICMP packet
+    ping_cmd += fqhn;                // Specify fqhn
+    ping_cmd += " > /dev/null 2>&1"; // Discard output from command
 
-        // Call command
-        return (std::system(pingCmd.c_str()) == 0) ? true : false;
-    }
+    // Call command
+    return (std::system(ping_cmd.c_str()) == 0) ? true : false;
+}
 
-    // transport layer connection test is based on nc.
-    auto testConnectionTcp(std::string const& addr, std::string const& port) -> bool
-    {
-        // Create command
-        std::string ncCmd;
+// transport layer connection test is based on nc.
+auto test_connection_tcp(std::string const& fqhn, std::string const& port) -> bool
+{
+    // Create command
+    std::string nc_cmd;
 
-        ncCmd += "nc -z "; // Establish connection, close afterwards
-        ncCmd += addr;     // Specify address
-        ncCmd += " ";
-        ncCmd += port;     // Specify port
+    nc_cmd += "nc -z "; // Establish connection, close afterwards
+    nc_cmd += fqhn;     // Specify address
+    nc_cmd += " ";
+    nc_cmd += port;     // Specify port
 
-        // Call command
-        return (std::system(ncCmd.c_str()) == 0) ? true : false;
-    }
+    // Call command
+    return (std::system(nc_cmd.c_str()) == 0) ? true : false;
+}
 } // anon namespace
 
-auto testConnection(Endpoint const& endpoint) -> bool
+auto test_connection(Endpoint const& endpoint) -> bool
 {
     // Demux by specified protocol
-    switch (endpoint.getProtocol())
+    switch (endpoint.get_protocol())
     {
-    case Protocol::ICMP:
-        return testConnectionIcmp(endpoint.getAddr());
+        case Endpoint::Protocol::ICMP:
+            return test_connection_icmp(endpoint.get_fqhn());
 
-    case Protocol::TCP:
-        return testConnectionTcp(endpoint.getAddr(), endpoint.getPort());
+        case Endpoint::Protocol::TCP:
+            return test_connection_tcp( endpoint.get_fqhn()
+                                      , endpoint.get_port().value());
 
     // NOTE: Add additional protocol support here ....
     }

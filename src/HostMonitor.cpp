@@ -13,163 +13,188 @@
  */
 
 #include <cstdint>
+#include <thread>
+#include <memory>
+#include <mutex>
+#include <condition_variable>
+#include <algorithm>
 #include "HostMonitor.hpp"
-#include "include/HostMonitorImpl.hpp"
+#include "TestConnection.hpp"
 
-namespace host_monitor {
-
-// Protocol related implementation
-auto protocolToString(Protocol p) -> std::string
+namespace host_monitor
 {
-    switch(p)
+
+class HostMonitor::Impl
+{
+public:
+    Impl( Endpoint                    endpoint
+        , std::vector<uint8_t> const& metadata
+        , std::chrono::seconds const& interval);
+
+    ~Impl();
+
+    void add_observer(std::shared_ptr<HostMonitorObserver> observer);
+
+    void del_observer(std::shared_ptr<HostMonitorObserver> observer);
+
+    auto is_available() const -> bool;
+
+    auto get_endpoint() const -> Endpoint;
+
+    auto get_metadata() const -> std::vector<uint8_t>;
+
+    auto get_interval() const -> std::chrono::seconds;
+
+private:
+    void monitor_target();
+
+    using ObserverVector = std::vector<std::shared_ptr<HostMonitorObserver>>;
+
+    Endpoint                endpoint_;      // Endpoint: @See Endpoint.
+    std::vector<uint8_t>    metadata_;      // Alias for Target
+    std::chrono::seconds    interval_;      // Interval between Connection Tests
+    std::thread             thread_;        // Thread performing periodic tests
+    std::mutex              mtx_;           // Mutex to use with condition variables
+    std::condition_variable cv_;            // Thread sleeping condition
+    bool                    shutdown_;      // Thread life-time management Flag
+    bool                    available_;     // Holds result from last connection test
+    ObserverVector          observers_;     // Vector holding registered observers
+    std::mutex              observers_mtx_; // Lock for synchronizing access to observers_
+};
+
+HostMonitor::Impl::Impl( Endpoint                    endpoint
+                       , std::vector<uint8_t> const& metadata
+                       , std::chrono::seconds const& interval)
+    : endpoint_(endpoint)
+    , metadata_(metadata)
+    , interval_(interval)
+    , thread_()
+    , mtx_()
+    , cv_()
+    , shutdown_(false)
+    , available_(false)
+    , observers_()
+    , observers_mtx_()
+{
+    // Start Monitor thread in case given endpoints protocol is supported
+    thread_ = std::thread(&HostMonitor::Impl::monitor_target, this);
+}
+
+HostMonitor::Impl::~Impl()
+{
     {
-    case Protocol::ICMP:
-        return "icmp";
-
-    case Protocol::TCP:
-        return "tcp";
-
-    default:
-        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) +
-                                 ": given Protocol is found");
+        auto lock = std::unique_lock<std::mutex>(mtx_);
+        shutdown_ = true;
+        cv_.notify_one();
     }
+    thread_.join();
 }
 
-auto stringToProtocol(std::string s) -> Protocol
+void HostMonitor::Impl::add_observer(std::shared_ptr<HostMonitorObserver> observer)
 {
-    if (s == "icmp")
+    std::lock_guard<std::mutex> lock(observers_mtx_);
+    observers_.push_back(observer);
+}
+
+void HostMonitor::Impl::del_observer(std::shared_ptr<HostMonitorObserver> observer)
+{
+    std::lock_guard<std::mutex> lock(observers_mtx_);
+    auto pos = std::remove(observers_.begin(), observers_.end(), observer);
+    observers_.erase(pos, observers_.end());
+}
+
+auto HostMonitor::Impl::is_available() const -> bool
+{
+    return available_;
+}
+
+auto HostMonitor::Impl::get_endpoint() const -> Endpoint
+{
+    return endpoint_;
+}
+
+auto HostMonitor::Impl::get_metadata() const -> std::vector<uint8_t>
+{
+    return metadata_;
+}
+
+auto HostMonitor::Impl::get_interval() const -> std::chrono::seconds
+{
+    return interval_;
+}
+
+void HostMonitor::Impl::monitor_target()
+{
+    while (shutdown_ == false)
     {
-        return Protocol::ICMP;
+        // Perform connection test
+        auto available_n1 = bool(available_);
+        auto available_n = bool(test_connection(endpoint_));
+
+        // Update State and inform observers
+        if (available_n1 != available_n)
+        {
+            available_ = available_n;
+
+            // Update Observers on state change
+            std::lock_guard<std::mutex> lock(observers_mtx_);
+            for (auto obs : observers_)
+            {
+                obs->state_change(endpoint_, metadata_, interval_, available_);
+            }
+
+            // Update old state
+            available_n1 = available_n;
+        }
+
+        // Sleep until duration expired or a shutdown is initiated
+        auto lock = std::unique_lock<std::mutex>(mtx_);
+        auto pred = [this] ()
+        {
+            return shutdown_;
+        };
+        cv_.wait_for(lock, interval_, pred);
     }
-
-    if (s == "tcp")
-    {
-        return Protocol::TCP;
-    }
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) +
-                             ": " + s + " is not in Protocols");
 }
 
-// Endpoint related implementation
-Endpoint::Endpoint(Protocol           protocol,
-                   std::string const& addr,
-                   std::string const& port)
-    : protocol(protocol)
-    , targetAddr(addr)
-    , targetPort(port)
+// Interface Implementation
+HostMonitor::HostMonitor( Endpoint                    endpoint
+                        , std::vector<uint8_t> const& metadata
+                        , std::chrono::seconds const& interval)
 {
+    pimpl_ = std::make_unique<Impl>(endpoint, metadata, interval);
 }
 
-auto Endpoint::getTarget() const -> std::string
-{
-    std::string str;
-    switch(protocol)
-    {
-    case Protocol::ICMP:
-        str = this->getAddr();
-        break;
+HostMonitor::~HostMonitor() = default;
 
-    case Protocol::TCP:
-        str = this->getAddr() + ":" + this->getPort();
-        break;
-    }
-    return str;
+void HostMonitor::add_observer(std::shared_ptr<HostMonitorObserver> observer)
+{
+    pimpl_->add_observer(observer);
 }
 
-auto Endpoint::getAddr() const -> std::string
+void HostMonitor::del_observer(std::shared_ptr<HostMonitorObserver> observer)
 {
-    return this->targetAddr;
+    pimpl_->del_observer(observer);
 }
 
-auto Endpoint::getPort() const -> std::string
+auto HostMonitor::is_available() const -> bool
 {
-    return this->targetPort;
+    return pimpl_->is_available();
 }
 
-auto Endpoint::getProtocol() const -> Protocol
+auto HostMonitor::get_endpoint() const -> Endpoint
 {
-    return this->protocol;
+    return pimpl_->get_endpoint();
 }
 
-auto makeIcmpEndpoint(std::string const& targetAddr) -> Endpoint
+auto HostMonitor::get_metadata() const -> std::vector<uint8_t>
 {
-    return Endpoint(Protocol::ICMP, targetAddr, "");
+    return pimpl_->get_metadata();
 }
 
-auto makeTcpEndpoint(std::string const& targetAddr, std::string const& targetPort) -> Endpoint
+auto HostMonitor::get_interval() const -> std::chrono::seconds
 {
-    // Try to convert the given port number to an int
-    int val = 0;
-    try {
-        val = std::stoi(targetPort);
-    }
-    catch (...)
-    {
-        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) +
-                                 ": " + targetPort + " is not a valid number");
-    }
-
-    // Check if given Port number is within the port number range
-    int min = 0x0001;
-    int max = 0xFFFF;
-    if (val < min || max < val)
-    {
-        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) +
-                                 ": " + targetPort + " is not in [1, 65535]");
-    }
-
-    // Create endpoint
-    return Endpoint(Protocol::TCP, targetAddr, targetPort);
-}
-
-// Host Monitor related implementation
-HostMonitor::HostMonitor(Endpoint                    target,
-                         std::string const&          alias,
-                         std::chrono::seconds const& interval)
-{
-    this->pimpl_ = new HostMonitorImpl(target, alias, interval);
-}
-
-HostMonitor::~HostMonitor()
-{
-    delete this->pimpl_;
-}
-
-auto HostMonitor::addObserver(std::shared_ptr<HostMonitorObserver>& observer) -> void
-{
-    this->pimpl_->addObserver(observer);
-}
-
-auto HostMonitor::delObserver(std::shared_ptr<HostMonitorObserver>& observer) -> void
-{
-    this->pimpl_->delObserver(observer);
-}
-
-auto HostMonitor::avail() const -> bool
-{
-    return this->pimpl_->avail();
-}
-
-auto HostMonitor::getEndpoint() const -> Endpoint
-{
-    return this->pimpl_->getEndpoint();
-}
-
-auto HostMonitor::getAlias() const -> std::string
-{
-    return this->pimpl_->getAlias();
-}
-
-auto HostMonitor::getInterval() const -> std::chrono::seconds
-{
-    return this->pimpl_->getInterval();
-}
-
-auto makeHostMonitor(Endpoint                    target,
-                     std::string const&          alias,
-                     std::chrono::seconds const& interval) -> std::shared_ptr<HostMonitor>
-{
-    return std::make_shared<HostMonitor>(target, alias, interval);
+    return pimpl_->get_interval();
 }
 
 } // namespace host_monitor
