@@ -15,12 +15,13 @@
 #ifndef HOSTMONITOR_HPP_201706130847
 #define HOSTMONITOR_HPP_201706130847
 
+#include <vector>
+#include <optional>
 #include <string>
 #include <chrono>
 #include <memory>
 #include <cstdint>
-#include <vector>
-#include <optional>
+
 #include "Endpoint.hpp"
 #include "HostMonitorObserver.hpp"
 

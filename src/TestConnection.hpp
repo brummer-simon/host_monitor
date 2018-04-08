@@ -15,7 +15,6 @@
 #ifndef TESTCONNECTION_HPP_201706130910
 #define TESTCONNECTION_HPP_201706130910
 
-#include <string>
 #include "HostMonitor.hpp"
 
 namespace host_monitor

@@ -13,6 +13,7 @@
  */
 
 #include <cstdlib>
+
 #include "TestConnection.hpp"
 
 namespace host_monitor

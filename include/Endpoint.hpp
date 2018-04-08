@@ -16,11 +16,8 @@
 #define ENDPOINT_HPP_201706130847
 
 #include <string>
-#include <chrono>
-#include <memory>
-#include <cstdint>
-#include <vector>
 #include <optional>
+#include <cstdint>
 
 namespace host_monitor
 {
@@ -50,7 +47,8 @@ public:
      * @param[in] port   Port number to connect to.
      * @returns Configured Endpoint
      */
-    static auto make_tcp_endpoint(std::string const& fqhn, std::string const& port) -> Endpoint;
+    static auto make_tcp_endpoint( std::string const& fqhn
+                                 , std::string const& port) -> Endpoint;
 
     /**
      * @brief Get endpoints target.

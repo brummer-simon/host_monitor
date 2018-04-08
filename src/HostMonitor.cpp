@@ -12,12 +12,12 @@
  * @date   12.6.2017
  */
 
-#include <cstdint>
 #include <thread>
-#include <memory>
 #include <mutex>
 #include <condition_variable>
 #include <algorithm>
+#include <cstdint>
+
 #include "HostMonitor.hpp"
 #include "TestConnection.hpp"
 

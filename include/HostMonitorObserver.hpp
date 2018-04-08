@@ -15,10 +15,10 @@
 #ifndef HOSTMONITOROBSERVER_HPP_201706130847
 #define HOSTMONITOROBSERVER_HPP_201706130847
 
-#include <chrono>
-#include <memory>
-#include <cstdint>
 #include <vector>
+#include <chrono>
+#include <cstdint>
+
 #include "Endpoint.hpp"
 
 namespace host_monitor
