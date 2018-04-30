@@ -46,25 +46,26 @@ auto string_to_protocol(std::string const& s) -> std::optional<Endpoint::Protoco
 }
 
 
-Endpoint::Endpoint( Endpoint::Protocol                protocol
-                  , std::string const&                fqhn
-                  , std::optional<std::string> const& port)
+Endpoint::Endpoint( Endpoint::Protocol         protocol
+                  , std::string                fqhn
+                  , std::optional<std::string> port)
     : protocol_(protocol)
-    , fqhn_(fqhn)
-    , port_(port)
+    , fqhn_(std::move(fqhn))
+    , port_(std::move(port))
 {
 }
 
-auto Endpoint::make_icmp_endpoint(std::string const& fqhn) -> Endpoint
+auto Endpoint::make_icmp_endpoint(std::string fqhn) -> Endpoint
 {
-    return Endpoint(Protocol::ICMP, fqhn, std::nullopt);
+    return Endpoint(Protocol::ICMP, std::move(fqhn), std::nullopt);
 }
 
-auto Endpoint::make_tcp_endpoint(std::string const& fqhn, std::string const& port) -> Endpoint
+auto Endpoint::make_tcp_endpoint(std::string fqhn, std::string port) -> Endpoint
 {
     // Try to convert the given port number to an int
-    int val = 0;
-    try {
+    auto val = 0;
+    try
+    {
         val = std::stoi(port);
     }
     catch (...)
@@ -74,8 +75,8 @@ auto Endpoint::make_tcp_endpoint(std::string const& fqhn, std::string const& por
     }
 
     // Check if given Port number is within the port number range
-    int min = 0x0001;
-    int max = 0xFFFF;
+    auto min = std::uint16_t(0x0001);
+    auto max = std::uint16_t(0xFFFF);
     if (val < min || max < val)
     {
         throw std::runtime_error(std::string(__PRETTY_FUNCTION__) +
@@ -83,12 +84,12 @@ auto Endpoint::make_tcp_endpoint(std::string const& fqhn, std::string const& por
     }
 
     // Create endpoint
-    return Endpoint(Endpoint::Protocol::TCP, fqhn, port);
+    return Endpoint(Endpoint::Protocol::TCP, std::move(fqhn), std::move(port));
 }
 
 auto Endpoint::get_target() const -> std::string
 {
-    std::string str;
+    auto str = std::string();
     switch(protocol_)
     {
         case Endpoint::Protocol::ICMP:

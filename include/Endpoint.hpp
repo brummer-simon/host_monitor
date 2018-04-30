@@ -38,7 +38,7 @@ public:
      * @param[in] fqhn   The target that should be monitored. Either FQDN or IP-Address.
      * @returns Configured Endpoint
      */
-    static auto make_icmp_endpoint(std::string const& fqhn) -> Endpoint;
+    static auto make_icmp_endpoint(std::string fqhn) -> Endpoint;
 
     /**
      * @brief Function to generate an TCP Endpoint.
@@ -47,8 +47,8 @@ public:
      * @param[in] port   Port number to connect to.
      * @returns Configured Endpoint
      */
-    static auto make_tcp_endpoint( std::string const& fqhn
-                                 , std::string const& port) -> Endpoint;
+    static auto make_tcp_endpoint( std::string fqhn
+                                 , std::string port) -> Endpoint;
 
     /**
      * @brief Get endpoints target.
@@ -75,9 +75,9 @@ public:
     auto get_protocol() const -> Endpoint::Protocol;
 
 private:
-    Endpoint( Endpoint::Protocol                protocol
-            , std::string const&                fqhn
-            , std::optional<std::string> const& port);
+    Endpoint( Endpoint::Protocol         protocol
+            , std::string                fqhn
+            , std::optional<std::string> port);
 
     Endpoint::Protocol         protocol_;
     std::string                fqhn_;
@@ -94,7 +94,7 @@ auto protocol_to_string(Endpoint::Protocol p) -> std::string;
 /**
  * @brief Convert String to Protocol enum.
  * @param[in] s   the string that should be parsed.
- * @returns @p as protocol. In case the given string can't be converted to a 
+ * @returns @p as protocol. In case the given string can't be converted to a
  *          protocol, the optional is none.
  */
 auto string_to_protocol(std::string const& s) -> std::optional<Endpoint::Protocol>;

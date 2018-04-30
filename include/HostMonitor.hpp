@@ -42,9 +42,9 @@ public:
      * @param[in] metadata   Free field to use how ever you want.
      * @param[in] interval   The duration between performed connection tests.
      */
-    HostMonitor( Endpoint                    endpoint
-               , std::vector<uint8_t> const& metadata
-               , std::chrono::seconds const& interval);
+    HostMonitor( Endpoint             endpoint
+               , std::vector<uint8_t> metadata
+               , std::chrono::seconds interval);
 
     ~HostMonitor();
 
@@ -73,19 +73,19 @@ public:
      * @brief Get monitored endpoint.
      * @returns Copy of the monitored endpoint.
      */
-    auto get_endpoint() const -> Endpoint;
+    auto get_endpoint() const -> Endpoint const&;
 
     /**
      * @brief Get metadata associated with monitor.
-     * @returns Copy of the associated metadata.
+     * @returns Ref of the associated metadata.
      */
-    auto get_metadata() const -> std::vector<std::uint8_t>;
+    auto get_metadata() const -> std::vector<std::uint8_t> const&;
 
     /**
      * @brief Get test interval of the monitor.
      * @returns Copy of the test interval.
      */
-    auto get_interval() const -> std::chrono::seconds;
+    auto get_interval() const -> std::chrono::seconds const&;
 
     /* Disable copying and moving */
     HostMonitor(HostMonitor const& other) = delete;

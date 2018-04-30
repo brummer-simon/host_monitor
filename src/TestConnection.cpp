@@ -24,7 +24,7 @@ namespace
 auto test_connection_icmp(std::string const& fqhn) -> bool
 {
     // Create command
-    std::string ping_cmd;
+    auto ping_cmd = std::string();
 
     ping_cmd += "ping -c 1 ";        // Send single ICMP packet
     ping_cmd += fqhn;                // Specify fqhn
@@ -38,7 +38,7 @@ auto test_connection_icmp(std::string const& fqhn) -> bool
 auto test_connection_tcp(std::string const& fqhn, std::string const& port) -> bool
 {
     // Create command
-    std::string nc_cmd;
+    auto nc_cmd = std::string();
 
     nc_cmd += "nc -z "; // Establish connection, close afterwards
     nc_cmd += fqhn;     // Specify address
