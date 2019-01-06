@@ -1,15 +1,13 @@
 /**
- * Copyright (C) 2017 Simon Brummer <simon.brummer@posteo.de>
- *
+ * @file      HostMonitor.hpp
+ * @author    Simon Brummer <simon.brummer@posteo.de>
+ * @copyright 2017 Simon Brummer. All rights reserved.
+ */
+
+/*
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
  * directory for more details.
- */
-
-/**
- * @file   HostMonitor.hpp
- * @author Simon Brummer
- * @date   12.6.2017
  */
 
 #ifndef HOSTMONITOR_HPP_201706130847
@@ -35,16 +33,12 @@ namespace host_monitor
 class HostMonitor
 {
 public:
-
     /**
      * @brief Constructor.
-     * @param[in] endpoint   The target that should be monitored. @See Endpoint.
-     * @param[in] metadata   Free field to use how ever you want.
+     * @param[in] endpoint   The target that should be monitored.
      * @param[in] interval   The duration between performed connection tests.
      */
-    HostMonitor( Endpoint             endpoint
-               , std::vector<uint8_t> metadata
-               , std::chrono::seconds interval);
+    HostMonitor(Endpoint endpoint, std::chrono::seconds interval);
 
     ~HostMonitor();
 
@@ -65,27 +59,21 @@ public:
     /**
      * @brief Check if target was reachable after the last connection check.
      * @returns true if target was reachable
-     *          false if target was not reachable
+     *          false if target was not reachable.
      */
-    auto is_available() const -> bool;
+    bool is_available() const;
 
     /**
      * @brief Get monitored endpoint.
      * @returns Copy of the monitored endpoint.
      */
-    auto get_endpoint() const -> Endpoint const&;
-
-    /**
-     * @brief Get metadata associated with monitor.
-     * @returns Ref of the associated metadata.
-     */
-    auto get_metadata() const -> std::vector<std::uint8_t> const&;
+    Endpoint const& get_endpoint() const;
 
     /**
      * @brief Get test interval of the monitor.
      * @returns Copy of the test interval.
      */
-    auto get_interval() const -> std::chrono::seconds const&;
+    std::chrono::seconds const& get_interval() const;
 
     /* Disable copying and moving */
     HostMonitor(HostMonitor const& other) = delete;
