@@ -1,0 +1,47 @@
+# Project sanity checks
+# Author: Simon Brummer <simon.brummer@posteo.de>
+
+# Check given Project Type
+ifeq ($(PROJECT_TYPE), binary)
+else ifeq ($(PROJECT_TYPE), libstatic)
+else ifeq ($(PROJECT_TYPE), libshared)
+else ifeq ($(PROJECT_TYPE), headeronly)
+else
+	INVALID_PROJECT_TYPE := true
+endif
+
+# Check given Build Type
+ifeq ($(PROJECT_CONFIG), debug)
+else ifeq ($(PROJECT_CONFIG), release)
+else ifeq ($(PROJECT_CONFIG), gtest)
+else
+	INVALID_PROJECT_BUILD := true
+endif
+
+# Check given combination
+ifeq ($(PROJECT_TYPE), binary)
+ifeq ($(PROJECT_CONFIG), gtest)
+	INVALID_PARAMS_BINARY_TEST := true
+endif
+endif
+
+ifeq ($(PROJECT_TYPE), headeronly)
+ifneq ($(PROJECT_CONFIG), gtest)
+	INVALID_PARAMS_HEADERONLY_NON_GTEST := true
+endif
+endif
+
+# Add target for sanity checking
+run_sanity_checks:
+ifdef INVALID_PROJECT_TYPE
+	$(error Invalid PROJECT_TYPE. It must be either "binary", "libstatic", "libshared" or "headeronly".)
+endif
+ifdef INVALID_PROJECT_CONFIG
+	$(error Invalid PROJECT_CONFIG. It must be either "debug", "release" or "gtest".)
+endif
+ifdef INVALID_PARAMS_BINARY_TEST
+	$(error Invalid Parameter combination. PROJECT_TYPE "binary" must not have PROJECT_CONFIG "gtest")
+endif
+ifdef INVALID_PARAMS_HEADERONLY_NON_GTEST
+	$(error Invalid Parameter combination. PROJECT_TYPE "headeronly" is only allowed to have PROJECT_CONFIG "gtest")
+endif

@@ -1,15 +1,13 @@
 /**
- * Copyright (C) 2017 Simon Brummer <simon.brummer@posteo.de>
- *
+ * @file      TestConnection.cpp
+ * @author    Simon Brummer <simon.brummer@posteo.de>
+ * @copyright 2017 Simon Brummer. All rights reserved.
+ */
+
+/*
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
  * directory for more details.
- */
-
-/**
- * @file   TestConnection.cpp
- * @author Simon Brummer
- * @date   12.6.2017
  */
 
 #include <cstdlib>
@@ -21,7 +19,7 @@ namespace host_monitor
 namespace
 {
 // network layer connection test is based on ping.
-auto test_connection_icmp(std::string const& fqhn) -> bool
+bool test_connection_icmp(std::string const& fqhn)
 {
     // Create command
     auto ping_cmd = std::string();
@@ -35,7 +33,7 @@ auto test_connection_icmp(std::string const& fqhn) -> bool
 }
 
 // transport layer connection test is based on nc.
-auto test_connection_tcp(std::string const& fqhn, std::string const& port) -> bool
+bool test_connection_tcp(std::string const& fqhn, std::string const& port)
 {
     // Create command
     auto nc_cmd = std::string();
@@ -50,7 +48,7 @@ auto test_connection_tcp(std::string const& fqhn, std::string const& port) -> bo
 }
 } // anon namespace
 
-auto test_connection(Endpoint const& endpoint) -> bool
+bool test_connection(Endpoint const& endpoint)
 {
     // Demux by specified protocol
     switch (endpoint.get_protocol())

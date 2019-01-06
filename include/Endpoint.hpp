@@ -1,15 +1,13 @@
 /**
- * Copyright (C) 2017 Simon Brummer <simon.brummer@posteo.de>
- *
+ * @file      Version.hpp
+ * @author    Simon Brummer <simon.brummer@posteo.de>
+ * @copyright 2017 Simon Brummer. All rights reserved.
+ */
+
+/*
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
  * directory for more details.
- */
-
-/**
- * @file   Endpoint.hpp
- * @author Simon Brummer
- * @date   12.6.2017
  */
 
 #ifndef ENDPOINT_HPP_201706130847
@@ -21,58 +19,56 @@
 
 namespace host_monitor
 {
-/**
- * @brief Endpoint structure used to hold connection parameters
- */
+/// @brief Endpoint structure used to hold connection parameters.
 class Endpoint
 {
 public:
+    /// @brief Protocol type used to reach an Endpoint.
     enum class Protocol
     {
-        ICMP = 0,
-        TCP,
+        ICMP = 0, ///< Use ICMP Packets to reach Endpoint.
+        TCP,      ///< Use TCP Packets to reach Endpoint.
     };
 
     /**
      * @brief Build icmp endpoint.
      * @param[in] fqhn   The target that should be monitored. Either FQDN or IP-Address.
-     * @returns Configured Endpoint
+     * @returns Configured Endpoint.
      */
-    static auto make_icmp_endpoint(std::string fqhn) -> Endpoint;
+    static Endpoint make_icmp_endpoint(std::string fqhn);
 
     /**
      * @brief Function to generate an TCP Endpoint.
      * @throws std::runtime_error in case @p port is invalid.
      * @param[in] fqhn   The target that should be monitored. Either FQDN or IP-Address.
      * @param[in] port   Port number to connect to.
-     * @returns Configured Endpoint
+     * @returns Configured Endpoint.
      */
-    static auto make_tcp_endpoint( std::string fqhn
-                                 , std::string port) -> Endpoint;
+    static Endpoint make_tcp_endpoint(std::string fqhn, std::string port);
 
     /**
      * @brief Get endpoints target.
-     * @returns string in the form "<fqhn>:<port>"
+     * @returns string in the form "<fqhn>:<port>".
      */
-    auto get_target() const -> std::string;
+    std::string get_target() const;
 
     /**
      * @brief Get endpoints fqhn.
      * @returns fqhn of the endpoint.
      */
-    auto get_fqhn() const -> std::string;
+    std::string get_fqhn() const;
 
     /**
      * @brief Get endpoints port.
      * @returns port if endpoint in case it exists.
      */
-    auto get_port() const -> std::optional<std::string>;
+    std::optional<std::string> get_port() const;
 
     /**
-     * @brief Get Protocol of Endpoint
+     * @brief Get Protocol of Endpoint.
      * @returns protocol of endpoint.
      */
-    auto get_protocol() const -> Endpoint::Protocol;
+    Endpoint::Protocol get_protocol() const;
 
 private:
     Endpoint( Endpoint::Protocol         protocol
@@ -89,7 +85,7 @@ private:
  * @param[in] p   The protocol value that should be converted.
  * @returns @p as string.
  */
-auto protocol_to_string(Endpoint::Protocol p) -> std::string;
+std::string protocol_to_string(Endpoint::Protocol p);
 
 /**
  * @brief Convert String to Protocol enum.
@@ -97,7 +93,7 @@ auto protocol_to_string(Endpoint::Protocol p) -> std::string;
  * @returns @p as protocol. In case the given string can't be converted to a
  *          protocol, the optional is none.
  */
-auto string_to_protocol(std::string const& s) -> std::optional<Endpoint::Protocol>;
+std::optional<Endpoint::Protocol> string_to_protocol(std::string const& s);
 
 } // namespace host_monitor
 #endif // ENDPOINT_HPP_201706130847

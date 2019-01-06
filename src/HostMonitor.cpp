@@ -1,15 +1,13 @@
 /**
- * Copyright (C) 2017 Simon Brummer <simon.brummer@posteo.de>
- *
+ * @file      HostMonitor.cpp
+ * @author    Simon Brummer <simon.brummer@posteo.de>
+ * @copyright 2017 Simon Brummer. All rights reserved.
+ */
+
+/*
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
  * directory for more details.
- */
-
-/**
- * @file   HostMonitor.cpp
- * @author Simon Brummer
- * @date   12.6.2017
  */
 
 #include <thread>
@@ -27,9 +25,7 @@ namespace host_monitor
 class HostMonitor::Impl
 {
 public:
-    Impl( Endpoint             endpoint
-        , std::vector<uint8_t> metadata
-        , std::chrono::seconds interval);
+    Impl(Endpoint endpoint, std::chrono::seconds interval);
 
     ~Impl();
 
@@ -37,13 +33,13 @@ public:
 
     void del_observer(std::shared_ptr<HostMonitorObserver> observer);
 
-    auto is_available() const -> bool;
+    bool is_available() const;
 
-    auto get_endpoint() const -> Endpoint const&;
+    Endpoint const& get_endpoint() const;
 
-    auto get_metadata() const -> std::vector<uint8_t> const&;
+    std::vector<uint8_t> const& get_metadata() const;
 
-    auto get_interval() const -> std::chrono::seconds const&;
+    std::chrono::seconds const&get_interval() const;
 
 private:
     void monitor_target();
@@ -51,7 +47,6 @@ private:
     using ObserverVector = std::vector<std::shared_ptr<HostMonitorObserver>>;
 
     Endpoint                endpoint_;      // Endpoint: @See Endpoint.
-    std::vector<uint8_t>    metadata_;      // Alias for Target
     std::chrono::seconds    interval_;      // Interval between Connection Tests
     std::thread             thread_;        // Thread performing periodic tests
     std::mutex              mtx_;           // Mutex to use with condition variables
@@ -62,11 +57,8 @@ private:
     std::mutex              observers_mtx_; // Lock for synchronizing access to observers_
 };
 
-HostMonitor::Impl::Impl( Endpoint             endpoint
-                       , std::vector<uint8_t> metadata
-                       , std::chrono::seconds interval)
+HostMonitor::Impl::Impl(Endpoint endpoint, std::chrono::seconds interval)
     : endpoint_(std::move(endpoint))
-    , metadata_(std::move(metadata))
     , interval_(std::move(interval))
     , thread_()
     , mtx_()
@@ -103,22 +95,17 @@ void HostMonitor::Impl::del_observer(std::shared_ptr<HostMonitorObserver> observ
     observers_.erase(pos, observers_.end());
 }
 
-auto HostMonitor::Impl::is_available() const -> bool
+bool HostMonitor::Impl::is_available() const
 {
     return available_;
 }
 
-auto HostMonitor::Impl::get_endpoint() const -> Endpoint const&
+Endpoint const& HostMonitor::Impl::get_endpoint() const
 {
     return endpoint_;
 }
 
-auto HostMonitor::Impl::get_metadata() const -> std::vector<uint8_t> const&
-{
-    return metadata_;
-}
-
-auto HostMonitor::Impl::get_interval() const -> std::chrono::seconds const&
+std::chrono::seconds const& HostMonitor::Impl::get_interval() const
 {
     return interval_;
 }
@@ -136,11 +123,14 @@ void HostMonitor::Impl::monitor_target()
         {
             available_ = available_n;
 
+            // Construct Data Object
+            auto const data = HostMonitorObserver::Data{endpoint_, interval_, available_};
+
             // Update Observers on state change
             auto lock = std::lock_guard<std::mutex>(observers_mtx_);
             for (auto obs : observers_)
             {
-                obs->state_change(endpoint_, metadata_, interval_, available_);
+                obs->state_change(data);
             }
 
             // Update old state
@@ -158,13 +148,9 @@ void HostMonitor::Impl::monitor_target()
 }
 
 // Interface Implementation
-HostMonitor::HostMonitor( Endpoint             endpoint
-                        , std::vector<uint8_t> metadata
-                        , std::chrono::seconds interval)
+HostMonitor::HostMonitor(Endpoint endpoint, std::chrono::seconds interval)
 {
-    pimpl_ = std::make_unique<Impl>( std::move(endpoint)
-                                   , std::move(metadata)
-                                   , std::move(interval));
+    pimpl_ = std::make_unique<Impl>(std::move(endpoint), std::move(interval));
 }
 
 HostMonitor::~HostMonitor() = default;
@@ -179,22 +165,17 @@ void HostMonitor::del_observer(std::shared_ptr<HostMonitorObserver> observer)
     pimpl_->del_observer(observer);
 }
 
-auto HostMonitor::is_available() const -> bool
+bool HostMonitor::is_available() const
 {
     return pimpl_->is_available();
 }
 
-auto HostMonitor::get_endpoint() const -> Endpoint const&
+Endpoint const& HostMonitor::get_endpoint() const
 {
     return pimpl_->get_endpoint();
 }
 
-auto HostMonitor::get_metadata() const -> std::vector<uint8_t> const&
-{
-    return pimpl_->get_metadata();
-}
-
-auto HostMonitor::get_interval() const -> std::chrono::seconds const&
+std::chrono::seconds const& HostMonitor::get_interval() const
 {
     return pimpl_->get_interval();
 }

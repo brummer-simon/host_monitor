@@ -1,15 +1,13 @@
 /**
- * Copyright (C) 2017 Simon Brummer <simon.brummer@posteo.de>
- *
+ * @file      TestConnection.hpp
+ * @author    Simon Brummer <simon.brummer@posteo.de>
+ * @copyright 2017 Simon Brummer. All rights reserved.
+ */
+
+/*
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
  * directory for more details.
- */
-
-/**
- * @file   TestConnection.hpp
- * @author Simon Brummer
- * @date   12.6.2017
  */
 
 #ifndef TESTCONNECTION_HPP_201706130910
@@ -25,7 +23,7 @@ namespace host_monitor
  * @param[in] endpoint   the endpoint to test.
  * @returns true in case @p endpoint is reachable. false if not.
  */
-auto test_connection(Endpoint const& endpoint) -> bool;
+bool test_connection(Endpoint const& endpoint);
 
 } // namespace host_monitor
 

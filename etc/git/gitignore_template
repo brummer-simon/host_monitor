@@ -38,6 +38,3 @@
 # Remove paths
 bin/*
 doc/*
-
-# Remove single files
-etc/doxygen/doxygen_cfg

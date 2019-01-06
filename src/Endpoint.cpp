@@ -1,15 +1,13 @@
 /**
- * Copyright (C) 2017 Simon Brummer <simon.brummer@posteo.de>
- *
+ * @file      Endpoint.cpp
+ * @author    Simon Brummer <simon.brummer@posteo.de>
+ * @copyright 2017 Simon Brummer. All rights reserved.
+ */
+
+/*
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
  * directory for more details.
- */
-
-/**
- * @file   Endpoint.cpp
- * @author Simon Brummer
- * @date   12.6.2017
  */
 
 #include "Endpoint.hpp"
@@ -18,7 +16,7 @@ namespace host_monitor
 {
 
 // Protocol related implementation
-auto protocol_to_string(Endpoint::Protocol p) -> std::string
+std::string protocol_to_string(Endpoint::Protocol p)
 {
     switch(p)
     {
@@ -31,7 +29,7 @@ auto protocol_to_string(Endpoint::Protocol p) -> std::string
     return std::string();
 }
 
-auto string_to_protocol(std::string const& s) -> std::optional<Endpoint::Protocol>
+std::optional<Endpoint::Protocol> string_to_protocol(std::string const& s)
 {
     if (s == "ICMP")
     {
@@ -55,12 +53,12 @@ Endpoint::Endpoint( Endpoint::Protocol         protocol
 {
 }
 
-auto Endpoint::make_icmp_endpoint(std::string fqhn) -> Endpoint
+Endpoint Endpoint::make_icmp_endpoint(std::string fqhn)
 {
     return Endpoint(Protocol::ICMP, std::move(fqhn), std::nullopt);
 }
 
-auto Endpoint::make_tcp_endpoint(std::string fqhn, std::string port) -> Endpoint
+Endpoint Endpoint::make_tcp_endpoint(std::string fqhn, std::string port)
 {
     // Try to convert the given port number to an int
     auto val = 0;
@@ -87,7 +85,7 @@ auto Endpoint::make_tcp_endpoint(std::string fqhn, std::string port) -> Endpoint
     return Endpoint(Endpoint::Protocol::TCP, std::move(fqhn), std::move(port));
 }
 
-auto Endpoint::get_target() const -> std::string
+std::string Endpoint::get_target() const
 {
     auto str = std::string();
     switch(protocol_)
@@ -103,17 +101,17 @@ auto Endpoint::get_target() const -> std::string
     return str;
 }
 
-auto Endpoint::get_fqhn() const -> std::string
+std::string Endpoint::get_fqhn() const
 {
     return fqhn_;
 }
 
-auto Endpoint::get_port() const -> std::optional<std::string>
+std::optional<std::string> Endpoint::get_port() const
 {
     return port_;
 }
 
-auto Endpoint::get_protocol() const -> Protocol
+Endpoint::Protocol Endpoint::get_protocol() const
 {
     return protocol_;
 }
