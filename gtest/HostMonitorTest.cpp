@@ -21,7 +21,7 @@ using host_monitor::HostMonitor;
 TEST(HostMonitorTest, ICMPToGoogle)
 {
     // Create Monitor.
-    auto ep = Endpoint::make_icmp_endpoint("www.google.de");
+    auto ep = Endpoint::make_icmp_endpoint("8.8.8.8");
     auto mon = HostMonitor(ep, std::chrono::seconds(1));
 
     // Wait for target to respond

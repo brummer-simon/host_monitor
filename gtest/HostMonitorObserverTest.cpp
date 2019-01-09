@@ -34,7 +34,7 @@ struct Observer : public host_monitor::HostMonitorObserver
 TEST(HostMonitorObserverTest, ICMPToGoogle)
 {
     // Create Monitor.
-    auto ep = Endpoint::make_icmp_endpoint("www.google.de");
+    auto ep = Endpoint::make_icmp_endpoint("8.8.8.8");
     auto mon = HostMonitor(ep, std::chrono::seconds(1));
     auto obs = std::make_shared<Observer>();
 
