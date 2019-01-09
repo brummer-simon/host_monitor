@@ -4,24 +4,24 @@
 # --- Global Project settings ---
 PROJECT_NAME     := host_monitor
 PROJECT_TYPE     := libshared
-PROJECT_CONFIG   := gtest
+PROJECT_CONFIG   := debug
 VERSION_MAJOR    := 1
 VERSION_MINOR    := 0
 VERSION_REVISION := 0
 
-include etc/make/header
+include etc/make/header.mk
 
 # --- Sources files ---
 SRC := \
 	Endpoint.cpp \
-	TestConnection.cpp \
 	HostMonitor.cpp \
+	TestConnection.cpp \
 	Version.cpp
 
 GTEST_SRC := \
-	VersionTest.cpp \
-	HostMonitorTest.cpp \
 	HostMonitorObserverTest.cpp \
+	HostMonitorTest.cpp \
+	VersionTest.cpp \
 	main.cpp
 
 # --- Compiler settings ---
@@ -68,6 +68,7 @@ LDFLAGS_DEBUG := \
 LDFLAGS_RELEASE := \
 
 LDFLAGS_GTEST := \
+	-Wl,-rpath="$(ABS_OUT_DIR)" \
 
 # --- Library settings ---
 LIBS_DEBUG := \
@@ -75,23 +76,20 @@ LIBS_DEBUG := \
 LIBS_RELEASE := \
 
 LIBS_GTEST := \
-	-L$(OUT_DIR) \
-	-l$(BIN_DEBUG_BASENAME) \
+	-L"$(ABS_OUT_DIR)" \
+	-l$(BIN_BASENAME) \
 	-lgtest \
 	-lpthread
 
 # --- Execution Arguments ---
 RUN_ARGS := \
 
-DEBUG_ARGS := \
+TEST_ARGS := \
 
-# --- Distribution settings ---
-DIST_INC_DIR := /usr/include
-DIST_BIN_DIR := /usr/bin
-DIST_LIB_DIR := /usr/lib
-
-# --- Misc. commands and tools ---
-DEBUGGER  := gdbgui
+# ---Install settings ---
+INSTALL_INC_DIR := /usr/local/include
+INSTALL_BIN_DIR := /usr/local/bin
+INSTALL_LIB_DIR := /usr/local/lib
 
 # Include actual make targets
-include etc/make/targets
+include etc/make/targets.mk
