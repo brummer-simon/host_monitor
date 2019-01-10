@@ -4,7 +4,7 @@
 # --- Global Project settings ---
 PROJECT_NAME     := host_monitor
 PROJECT_TYPE     := libshared
-PROJECT_CONFIG   := debug
+PROJECT_CONFIG   := release
 VERSION_MAJOR    := 1
 VERSION_MINOR    := 0
 VERSION_REVISION := 0
