@@ -20,8 +20,11 @@ std::string protocol_to_string(Endpoint::Protocol p)
 {
     switch(p)
     {
-        case Endpoint::Protocol::ICMP:
-            return std::string("ICMP");
+        case Endpoint::Protocol::ICMPV4:
+            return std::string("ICMPV4");
+
+        case Endpoint::Protocol::ICMPV6:
+            return std::string("ICMPV6");
 
         case Endpoint::Protocol::TCP:
             return std::string("TCP");
@@ -31,9 +34,14 @@ std::string protocol_to_string(Endpoint::Protocol p)
 
 std::optional<Endpoint::Protocol> string_to_protocol(std::string const& s)
 {
-    if (s == "ICMP")
+    if (s == "ICMPV4")
     {
-        return Endpoint::Protocol::ICMP;
+        return Endpoint::Protocol::ICMPV4;
+    }
+
+    if (s == "ICMPV6")
+    {
+        return Endpoint::Protocol::ICMPV6;
     }
 
     if (s == "TCP")
@@ -53,9 +61,14 @@ Endpoint::Endpoint( Endpoint::Protocol         protocol
 {
 }
 
-Endpoint Endpoint::make_icmp_endpoint(std::string fqhn)
+Endpoint Endpoint::make_icmpv4_endpoint(std::string fqhn)
 {
-    return Endpoint(Protocol::ICMP, std::move(fqhn), std::nullopt);
+    return Endpoint(Protocol::ICMPV4, std::move(fqhn), std::nullopt);
+}
+
+Endpoint Endpoint::make_icmpv6_endpoint(std::string fqhn)
+{
+    return Endpoint(Protocol::ICMPV6, std::move(fqhn), std::nullopt);
 }
 
 Endpoint Endpoint::make_tcp_endpoint(std::string fqhn, std::string port)
@@ -90,7 +103,8 @@ std::string Endpoint::get_target() const
     auto str = std::string();
     switch(protocol_)
     {
-        case Endpoint::Protocol::ICMP:
+        case Endpoint::Protocol::ICMPV4:
+        case Endpoint::Protocol::ICMPV6:
             str = get_fqhn();
             break;
 
