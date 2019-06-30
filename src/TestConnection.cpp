@@ -19,12 +19,18 @@ namespace host_monitor
 namespace
 {
 // network layer connection test is based on ping.
-bool test_connection_icmp(std::string const& fqhn)
+bool test_connection_icmp(std::string const& fqhn, bool useIPv6)
 {
     // Create command
     auto ping_cmd = std::string();
 
     ping_cmd += "ping -c 1 ";        // Send single ICMP packet
+
+    if (useIPv6)
+    {
+        ping_cmd += "-6 ";
+    }
+
     ping_cmd += fqhn;                // Specify fqhn
     ping_cmd += " > /dev/null 2>&1"; // Discard output from command
 
@@ -53,8 +59,11 @@ bool test_connection(Endpoint const& endpoint)
     // Demux by specified protocol
     switch (endpoint.get_protocol())
     {
-        case Endpoint::Protocol::ICMP:
-            return test_connection_icmp(endpoint.get_fqhn());
+        case Endpoint::Protocol::ICMPV4:
+            return test_connection_icmp(endpoint.get_fqhn(), false);
+
+        case Endpoint::Protocol::ICMPV6:
+            return test_connection_icmp(endpoint.get_fqhn(), true);
 
         case Endpoint::Protocol::TCP:
             return test_connection_tcp( endpoint.get_fqhn()

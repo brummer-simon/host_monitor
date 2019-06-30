@@ -30,11 +30,25 @@ struct Observer : public host_monitor::HostMonitorObserver
     bool available = false;
 };
 
-
-TEST(HostMonitorObserverTest, ICMPToGoogle)
+TEST(HostMonitorObserverTest, ICMPv4ToGoogle)
 {
     // Create Monitor.
-    auto ep = Endpoint::make_icmp_endpoint("8.8.8.8");
+    auto ep = Endpoint::make_icmpv4_endpoint("8.8.8.8");
+    auto mon = HostMonitor(ep, std::chrono::seconds(1));
+    auto obs = std::make_shared<Observer>();
+
+    mon.add_observer(obs);
+
+    // Wait for target to respond
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    ASSERT_TRUE(obs->available);
+}
+
+TEST(HostMonitorObserverTest, ICMPv6ToGoogle)
+{
+    // Create Monitor.
+    auto ep = Endpoint::make_icmpv6_endpoint("2001:4860:4860::8888");
     auto mon = HostMonitor(ep, std::chrono::seconds(1));
     auto obs = std::make_shared<Observer>();
 
@@ -61,10 +75,25 @@ TEST(HostMonitorObserverTest, TCPToGoogle)
     ASSERT_TRUE(obs->available);
 }
 
-TEST(HostMonitorObserverTest, ICMPToInvalid)
+TEST(HostMonitorObserverTest, ICMPv4ToInvalid)
 {
     // Create Monitor.
-    auto ep = Endpoint::make_icmp_endpoint("asdkhads.local");
+    auto ep = Endpoint::make_icmpv4_endpoint("asdkhads.local");
+    auto mon = HostMonitor(ep, std::chrono::seconds(1));
+    auto obs = std::make_shared<Observer>();
+
+    mon.add_observer(obs);
+
+    // Wait for target to respond
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    ASSERT_FALSE(obs->available);
+}
+
+TEST(HostMonitorObserverTest, ICMPv6ToInvalid)
+{
+    // Create Monitor.
+    auto ep = Endpoint::make_icmpv6_endpoint("asdkhads.local");
     auto mon = HostMonitor(ep, std::chrono::seconds(1));
     auto obs = std::make_shared<Observer>();
 

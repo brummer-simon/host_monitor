@@ -18,10 +18,22 @@
 using host_monitor::Endpoint;
 using host_monitor::HostMonitor;
 
-TEST(HostMonitorTest, ICMPToGoogle)
+TEST(HostMonitorTest, ICMPv4ToGoogle)
 {
     // Create Monitor.
-    auto ep = Endpoint::make_icmp_endpoint("8.8.8.8");
+    auto ep = Endpoint::make_icmpv4_endpoint("8.8.8.8");
+    auto mon = HostMonitor(ep, std::chrono::seconds(1));
+
+    // Wait for target to respond
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    ASSERT_TRUE(mon.is_available());
+}
+
+TEST(HostMonitorTest, ICMPv6ToGoogle)
+{
+    // Create Monitor.
+    auto ep = Endpoint::make_icmpv6_endpoint("2001:4860:4860::8888");
     auto mon = HostMonitor(ep, std::chrono::seconds(1));
 
     // Wait for target to respond
@@ -42,10 +54,22 @@ TEST(HostMonitorTest, TCPToGoogle)
     ASSERT_TRUE(mon.is_available());
 }
 
-TEST(HostMonitorTest, ICMPToInvalid)
+TEST(HostMonitorTest, ICMPv4ToInvalid)
 {
     // Create Monitor.
-    auto ep = Endpoint::make_icmp_endpoint("asdkhads.local");
+    auto ep = Endpoint::make_icmpv4_endpoint("asdkhads.local");
+    auto mon = HostMonitor(ep, std::chrono::seconds(1));
+
+    // Wait for target to respond
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    ASSERT_FALSE(mon.is_available());
+}
+
+TEST(HostMonitorTest, ICMPv6ToInvalid)
+{
+    // Create Monitor.
+    auto ep = Endpoint::make_icmpv4_endpoint("asdkhads.local");
     auto mon = HostMonitor(ep, std::chrono::seconds(1));
 
     // Wait for target to respond

@@ -26,16 +26,24 @@ public:
     /// @brief Protocol type used to reach an Endpoint.
     enum class Protocol
     {
-        ICMP = 0, ///< Use ICMP Packets to reach Endpoint.
-        TCP,      ///< Use TCP Packets to reach Endpoint.
+        ICMPV4 = 0, ///< Use ICMP Packets to reach Endpoint via IPv4.
+        ICMPV6,     ///< Use ICMP Packets to reach Endpoint via IPv6.
+        TCP,        ///< Use TCP Packets to reach Endpoint.
     };
 
     /**
-     * @brief Build icmp endpoint.
-     * @param[in] fqhn   The target that should be monitored. Either FQDN or IP-Address.
+     * @brief Build icmpv4 endpoint.
+     * @param[in] fqhn   The target that should be monitored. Either FQDN or IPv4-Address.
      * @returns Configured Endpoint.
      */
-    static Endpoint make_icmp_endpoint(std::string fqhn);
+    static Endpoint make_icmpv4_endpoint(std::string fqhn);
+
+    /**
+     * @brief Build icmpv6 endpoint.
+     * @param[in] fqhn   The target that should be monitored. Either FQDN or IPv6-Address.
+     * @returns Configured Endpoint.
+     */
+    static Endpoint make_icmpv6_endpoint(std::string fqhn);
 
     /**
      * @brief Function to generate an TCP Endpoint.
