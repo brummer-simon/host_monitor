@@ -10,6 +10,7 @@
  * directory for more details.
  */
 
+#include <stdexcept>
 #include "Endpoint.hpp"
 
 namespace host_monitor

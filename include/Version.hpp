@@ -23,7 +23,7 @@ struct Version
 {
     static char const * const major; ///< Major Version number.
     static char const * const minor; ///< Minor Version number.
-    static char const * const rev;   ///< Revision number.
+    static char const * const patch; ///< Patch number.
     static char const * const full;  ///< Full version number.
 };
 

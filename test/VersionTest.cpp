@@ -19,9 +19,9 @@ class VersionTest : public ::testing::Test
 {
 public:
     char const * const expected_major = "1";
-    char const * const expected_minor = "0";
-    char const * const expected_rev   = "0";
-    char const * const expected_full  = "1.0.0";
+    char const * const expected_minor = "1";
+    char const * const expected_patch = "0";
+    char const * const expected_full  = "1.1.0";
 
     void SetUp(void)
     {
@@ -46,10 +46,10 @@ TEST_F(VersionTest, MinorNumber)
              );
 }
 
-TEST_F(VersionTest, RevisionNumber)
+TEST_F(VersionTest, PatchNumber)
 {
-    ASSERT_EQ( std::string_view(expected_rev)
-             , std::string_view(Version::rev)
+    ASSERT_EQ( std::string_view(expected_patch)
+             , std::string_view(Version::patch)
              );
 }
 
